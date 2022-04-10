@@ -223,7 +223,7 @@ vector<int> MyGraph::Dijkstra_queue(int inpVert, int& counter) const {
 				if (newDistance < distances[i]) {
 					distances[i] = newDistance;
 					pq.push(std::make_pair(newDistance, i));	//По-хорошему, нужно не добавлять новые пары в очередь,
-																//а редактировать уже существующие. Но pq не предоставляет произвольный доступ.
+																//а редактировать уже существующие. Но pq не предоставляет произвольный доступ. АЛО
 				}
 			}
 		}
