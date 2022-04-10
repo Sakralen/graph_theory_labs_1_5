@@ -234,20 +234,20 @@ vector<int> MyGraph::Dijkstra_queue(int inpVert, int& counter) const {
 #undef DISTANCE
 #undef VERTICE
 
-vector<vector<int>> MyGraph::RestorePaths(int inpVert, const vector<int>& labels) const {
+vector<vector<int>> MyGraph::RestorePaths(int inpVert, const vector<int>& distances, const vector<vector<int>> weightMx) const {
 	vector<vector<int>> paths(vertexCnt, vector<int>());
 	int tmp, curVert;
 	for (int i = 0; i < vertexCnt; i++) {
-		if (labels[i]/* != 0*/) {		//== 0 -- исходная вершина
-			if (labels[i] != INF) {	//Если есть путь
+		if (distances[i]/* != 0*/) {		//== 0 -- исходная вершина
+			if (distances[i] != INF) {	//Если есть путь
 				curVert = i;
 				paths[i].push_back(curVert);
 				while (curVert != inpVert) {	//Пока не дошли до исходной вершины
-					for (int j = 0; j <= vertexCnt; j++) {	//Ищем такую смежную вершину с нынешней, чтобы
+					for (int j = 0; j < vertexCnt; j++) {	//Ищем такую смежную вершину с нынешней, чтобы
 															//значение ее метки было равно разности значений
 															//метки нынешней вершины и веса ребра между ними
-						if (modPosWeightsMx[j][curVert] != INF) {
-							if ((labels[curVert] - modPosWeightsMx[j][curVert]) == labels[j]) {
+						if (weightMx[j][curVert] != INF) {
+							if ((distances[curVert] - weightMx[j][curVert]) == distances[j]) {
 								curVert = j;
 								paths[i].push_back(j);
 								break;

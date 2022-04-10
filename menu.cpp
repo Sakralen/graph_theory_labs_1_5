@@ -135,7 +135,7 @@ void ExecDijkstra(const MyGraph& graph) {
 	cout << "П Е Р Е Б О Р:\n";
 
 	vector<int> distances = graph.Dijkstra(inpVert, counter);
-	vector<vector<int>> paths = graph.RestorePaths(inpVert, distances);
+	vector<vector<int>> paths = graph.RestorePaths(inpVert, distances, graph.GetWeightsMatrix(WeightsType::kModifiedPos));
 
 	for (int i = 0; i < graph.GetVertexCount(); i++) {
 		if (i != inpVert) {
@@ -158,7 +158,7 @@ void ExecDijkstra(const MyGraph& graph) {
 	cout << "О Ч Е Р Е Д Ь:\n";
 
 	distances = graph.Dijkstra_queue(inpVert, counter);
-	paths = graph.RestorePaths(inpVert, distances);
+	paths = graph.RestorePaths(inpVert, distances, graph.GetWeightsMatrix(WeightsType::kModifiedPos));
 
 	for (int i = 0; i < graph.GetVertexCount(); i++) {
 		if (i != inpVert) {
@@ -212,11 +212,11 @@ void ExecBellmanFord(const MyGraph& graph) {
 	inpVert--;
 
 	cout << "Матрица весов:\n";
-	PrintMatrix(graph.GetWeightsMatrix(WeightsType::kPositive));
+	PrintMatrix(graph.GetWeightsMatrix(WeightsType::kMixed));
 	cout << '\n';
 
 	vector<int> distances = graph.BellmanFord(inpVert, counter);
-	vector<vector<int>> paths = graph.RestorePaths(inpVert, distances);
+	vector<vector<int>> paths = graph.RestorePaths(inpVert, distances, graph.GetWeightsMatrix(WeightsType::kModifiedMixed));
 
 	for (int i = 0; i < graph.GetVertexCount(); i++) {
 		if (i != inpVert) {

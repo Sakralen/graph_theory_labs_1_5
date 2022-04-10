@@ -48,7 +48,7 @@ public:
 	void GenReachMatrix();
 	vector<int> Dijkstra(int inpVert, int& counter) const;
 	vector<int> Dijkstra_queue(int inpVert, int& counter) const;
-	vector<vector<int>> RestorePaths(int inpVert, const vector<int>& labels) const;
+	vector<vector<int>> RestorePaths(int inpVert, const vector<int>& distances, const vector<vector<int>> weightMx) const;
 	vector<int> BellmanFord(int inpVert, int& counter) const;
 };
 
