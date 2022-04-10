@@ -281,8 +281,8 @@ vector<int> MyGraph::BellmanFord(int inpVert, int& counter) const {
 		curVert = dq.front();
 		dq.pop_front();
 		for (int i = curVert + 1; i < vertexCnt; i++, counter++) {
-			if (modPosWeightsMx[curVert][i] != INF) {
-				newDistance = distances[curVert] + modPosWeightsMx[curVert][i];
+			if (modMixedWeightsMx[curVert][i] != INF) {
+				newDistance = distances[curVert] + modMixedWeightsMx[curVert][i];
 				if (newDistance < distances[i]) {
 					distances[i] = newDistance;
 					if (std::find(dq.begin(), dq.end(), i) == dq.end()) {		//этой вершины в очереди нет
