@@ -152,7 +152,7 @@ void ExecDijkstra(const MyGraph& graph) {
 		}
 	}
 	cout << '\n';
-	cout << "Количество итераций:" << std::setw(4) << counter << '\n';
+	cout << "Количество итераций: " << counter << '\n';
 	cout << '\n';
 
 	cout << "О Ч Е Р Е Д Ь:\n";
@@ -175,7 +175,7 @@ void ExecDijkstra(const MyGraph& graph) {
 		}
 	}
 	cout << '\n';
-	cout << "Количество итераций:" << std::setw(4) << counter << '\n';
+	cout << "Количество итераций: " << counter << '\n';
 	cout << '\n';
 
 	//cout << "Б Ф:\n";
@@ -221,7 +221,7 @@ void ExecBellmanFord(const MyGraph& graph) {
 	for (int i = 0; i < graph.GetVertexCount(); i++) {
 		if (i != inpVert) {
 			if (paths[i][0] != INF) {
-				cout << "Кратчайший путь длиной " << std::setw(2) << distances[i] << " до вершины " << std::setw(2) << i + 1 << ": ";
+				cout << "Кратчайший путь длиной " << std::setw(3) << distances[i] << " до вершины " << std::setw(2) << i + 1 << ": ";
 				for (int j = paths[i].size() - 1; j > 0; j--) {
 					cout << std::setw(2) << paths[i][j] + 1 << " -> ";
 				}
@@ -233,6 +233,33 @@ void ExecBellmanFord(const MyGraph& graph) {
 		}
 	}
 	cout << '\n';
-	cout << "Количество итераций:" << std::setw(4) << counter << '\n';
+	cout << "Количество итераций: " << counter << '\n';
+	cout << '\n';
+}
+
+void ExecFloydWarshall(const MyGraph& graph) {
+	int counter = 0;
+
+	cout << "Матрица весов:\n";
+	PrintMatrix(graph.GetWeightsMatrix(WeightsType::kMixed));
+	cout << '\n';
+
+	vector<vector<int>> distancesMx = graph.FloydWarshall(counter);
+
+	cout << "Матрица расстояний:\n";
+	for (int i = 0; i < graph.GetVertexCount(); i++) {
+		for (int j = 0; j < graph.GetVertexCount(); j++) {
+			if (distancesMx[i][j] != INF) {
+				cout << std::setw(3) << distancesMx[i][j] << " ";
+			}
+			else {
+				cout << std::setw(3) << "INF" << " ";
+			}
+		}
+		cout << '\n';
+	}
+	cout << '\n';
+
+	cout << "Количество итераций: " << counter << '\n';
 	cout << '\n';
 }

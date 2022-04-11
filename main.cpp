@@ -35,6 +35,9 @@ void main() {
 			case MenuItems::kBellmanFord:
 				ExecBellmanFord(graph);
 				break;
+			case MenuItems::kFloydWarshall:
+				ExecFloydWarshall(graph);
+				break;
 			default:
 				break;
 		}

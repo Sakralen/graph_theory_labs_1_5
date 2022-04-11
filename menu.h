@@ -6,7 +6,7 @@
 //!include
 
 //define:
-#define MENU_ITEMS_MAX 4
+#define MENU_ITEMS_MAX 5
 #define MENU_ITEMS_MIN 0
 //!define
 
@@ -16,7 +16,8 @@ enum class MenuItems {
 	kShimbell,
 	kReachability,
 	kDijkstra,
-	kBellmanFord
+	kBellmanFord,
+	kFloydWarshall
 };
 //!enum
 
@@ -31,7 +32,8 @@ static const char* kMenuItemsArr[] = {
 "Метод Шимбелла",
 "Определение возможности построения маршрута",
 "Алгоритм Дейкстры",
-"Алгоритм Беллмана-Форда"
+"Алгоритм Беллмана-Форда",
+"Алгоритм Флойда-Уоршелла"
 };
 //!const
 
@@ -45,5 +47,6 @@ void ExecShimbell(const MyGraph& graph);
 void ExecReachability(const MyGraph& graph);
 void ExecDijkstra(const MyGraph& graph);
 void ExecBellmanFord(const MyGraph& graph);
+void ExecFloydWarshall(const MyGraph& graph);
 //!functions
 

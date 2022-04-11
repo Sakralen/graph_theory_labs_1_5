@@ -200,7 +200,7 @@ vector<int> MyGraph::Dijkstra(int inpVert, int& counter) const {
 }
 
 #define DISTANCE first
-#define VERTICE second
+#define VERTEX second
 
 //https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-using-priority_queue-stl/amp/
 vector<int> MyGraph::Dijkstra_queue(int inpVert, int& counter) const {
@@ -217,9 +217,9 @@ vector<int> MyGraph::Dijkstra_queue(int inpVert, int& counter) const {
 	while (!pq.empty()) {
 		cur = pq.top();
 		pq.pop();
-		for (int i = cur.VERTICE + 1; i < vertexCnt; i++, counter++) {
-			if (modPosWeightsMx[cur.VERTICE][i] != INF) {
-				newDistance = cur.DISTANCE + modPosWeightsMx[cur.VERTICE][i];
+		for (int i = cur.VERTEX + 1; i < vertexCnt; i++, counter++) {
+			if (modPosWeightsMx[cur.VERTEX][i] != INF) {
+				newDistance = cur.DISTANCE + modPosWeightsMx[cur.VERTEX][i];
 				if (newDistance < distances[i]) {
 					distances[i] = newDistance;
 					pq.push(std::make_pair(newDistance, i));	//ѕо-хорошему, нужно не добавл€ть новые пары в очередь,
@@ -232,7 +232,7 @@ vector<int> MyGraph::Dijkstra_queue(int inpVert, int& counter) const {
 }
 
 #undef DISTANCE
-#undef VERTICE
+#undef VERTEX
 
 vector<vector<int>> MyGraph::RestorePaths(int inpVert, const vector<int>& distances, const vector<vector<int>> weightMx) const {
 	vector<vector<int>> paths(vertexCnt, vector<int>());
@@ -298,4 +298,23 @@ vector<int> MyGraph::BellmanFord(int inpVert, int& counter) const {
 	}
 
 	return distances;
+}
+
+vector<vector<int>> MyGraph::FloydWarshall(int& counter) const {
+	vector<vector<int>> distancesMx = modMixedWeightsMx;
+	for (int i = 0; i < vertexCnt; i++) {
+		for (int j = 0; j < vertexCnt; j++) {
+			for (int k = 0; k < vertexCnt; k++, counter++) {
+				if (distancesMx[i][k] != INF && distancesMx[k][j] != INF) {
+					distancesMx[i][j] = std::min(distancesMx[i][j], (distancesMx[i][k] + distancesMx[k][j]));
+				}
+			}
+		}
+	}
+
+	for (int i = 0; i < vertexCnt; i++) {
+		distancesMx[i][i] = 0;
+	}
+
+	return distancesMx;
 }
