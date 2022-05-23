@@ -6,6 +6,7 @@ void main() {
 	setlocale(LC_ALL, "Russian");
 	int menuItem;
 	MenuItems item;
+	bool overrideFlag = false;
 
 	MyGraph graph = GenGraph();
 
@@ -38,9 +39,15 @@ void main() {
 			case MenuItems::kFloydWarshall:
 				ExecFloydWarshall(graph);
 				break;
+			case MenuItems::kMinCostFlow:
+				ExecMinCostFlow(graph);
+				break;
+			case MenuItems::kExit:
+				overrideFlag = true;
+				break;
 			default:
 				break;
 		}
-	} while (IsContinue());
+	} while (IsContinue(overrideFlag));
 	stop
 }

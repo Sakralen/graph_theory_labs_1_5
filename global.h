@@ -10,6 +10,8 @@
 #include <string>
 #include <regex>
 #include <queue>
+#include <map>
+#include <numeric>
 
 #include "MyShuffler.h"
 //!include
@@ -25,11 +27,13 @@ using std::regex;
 using std::string;
 using std::priority_queue;
 using std::pair;
+using std::queue;
 using std::deque;
 //!using
 
 //typedef:
 typedef pair<int, int> i2Pair;
+typedef vector<vector<int>> iMx;
 //!typedef
 
 //define:
@@ -49,8 +53,8 @@ typedef pair<int, int> i2Pair;
 
 //functions:
 int FurryRng(double param = FURRY_DISTRIB_PARAM);
-void PrintMatrix(const vector<vector<int>> vec);
+void PrintMatrix(const iMx vec);
 
-vector<vector<int>> matrixBoolMult(const vector<vector<int>> mxA, const vector<vector<int>> mxB);
-vector<vector<int>> matrixAdd(const vector<vector<int>> mxA, const vector<vector<int>> mxB);
+iMx matrixBoolMult(const iMx mxA, const iMx mxB);
+iMx matrixAdd(const iMx mxA, const iMx mxB);
 //!functions

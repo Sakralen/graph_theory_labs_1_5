@@ -1,29 +1,34 @@
 #include "menu.h"
 
-bool IsContinue() {
-	char d;
-	string strInp;
-	bool isOk = false;
-	do {
-		cout << "Продолжить? (Y/N): ";
-		getline(cin, strInp);
-		if (regex_match(strInp, kRxYn)) {
-			isOk = true;
-			d = strInp[0];
-			switch (d) {
-			case 'Y':
-			case 'y':
-				return true;
-			case 'N':
-			case 'n':
-				return false;
+bool IsContinue(bool overrideFlag) {
+	if (overrideFlag) {
+		return false;
+	}
+	else {
+		char d;
+		string strInp;
+		bool isOk = false;
+		do {
+			cout << "Продолжить? (Y/N): ";
+			getline(cin, strInp);
+			if (regex_match(strInp, kRxYn)) {
+				isOk = true;
+				d = strInp[0];
+				switch (d) {
+				case 'Y':
+				case 'y':
+					return true;
+				case 'N':
+				case 'n':
+					return false;
+				}
 			}
-		}
-		else {
-			isOk = false;
-			cout << "Некорректный ввод!\n";
-		}
-	} while (!isOk);
+			else {
+				isOk = false;
+				cout << "Некорректный ввод!\n";
+			}
+		} while (!isOk);
+	}
 }
 
 void PrintMenu() {
@@ -34,14 +39,25 @@ void PrintMenu() {
 	cout << kDelimeter << '\n';
 }
 
-bool GetInputInt(int& iInp, int min, int max) {
+bool GetInputInt(int& iInp, int min, int max, int forbidden) {
 	string strInp;
 	bool res;
 	getline(cin, strInp);
 	if (regex_match(strInp, kRxNumber)) {
 		iInp = stoi(strInp);
 		if (IS_IN_RANGE(iInp, min, max)) {
-			res = true;
+			if (forbidden == INT_MAX) {
+				res = true;
+			}
+			else {
+				if (iInp != forbidden) {
+					res = true;
+				}
+				else {
+					res = false;
+				}
+			}
+			
 		}
 		else {
 			res = false;
@@ -96,7 +112,7 @@ void ExecShimbell(const MyGraph& graph) {
 
 void ExecReachability(const MyGraph& graph) {
 	int vert1, vert2;
-	vector<vector<int>> reachMatrix = graph.GetReachMatrix();
+	iMx reachMatrix = graph.GetReachMatrix();
 	do {
 		cout << "Введите номер первой вершины:\n";
 	} while (!GetInputInt(vert1, 1, graph.GetVertexCount()));
@@ -135,7 +151,7 @@ void ExecDijkstra(const MyGraph& graph) {
 	cout << "П Е Р Е Б О Р:\n";
 
 	vector<int> distances = graph.Dijkstra(inpVert, counter);
-	vector<vector<int>> paths = graph.RestorePaths(inpVert, distances, graph.GetWeightsMatrix(WeightsType::kModifiedPos));
+	iMx paths = graph.RestorePaths(inpVert, distances, graph.GetWeightsMatrix(WeightsType::kModifiedPos));
 
 	for (int i = 0; i < graph.GetVertexCount(); i++) {
 		if (i != inpVert) {
@@ -215,8 +231,8 @@ void ExecBellmanFord(const MyGraph& graph) {
 	PrintMatrix(graph.GetWeightsMatrix(WeightsType::kMixed));
 	cout << '\n';
 
-	vector<int> distances = graph.BellmanFord(inpVert, counter);
-	vector<vector<int>> paths = graph.RestorePaths(inpVert, distances, graph.GetWeightsMatrix(WeightsType::kModifiedMixed));
+	vector<int> distances = graph.BellmanFord(inpVert, graph.GetWeightsMatrix(WeightsType::kMixed), counter);
+	iMx paths = graph.RestorePaths(inpVert, distances, graph.GetWeightsMatrix(WeightsType::kModifiedMixed));
 
 	for (int i = 0; i < graph.GetVertexCount(); i++) {
 		if (i != inpVert) {
@@ -244,7 +260,7 @@ void ExecFloydWarshall(const MyGraph& graph) {
 	PrintMatrix(graph.GetWeightsMatrix(WeightsType::kMixed));
 	cout << '\n';
 
-	vector<vector<int>> distancesMx = graph.FloydWarshall(counter);
+	iMx distancesMx = graph.FloydWarshall(counter);
 
 	cout << "Матрица расстояний:\n";
 	for (int i = 0; i < graph.GetVertexCount(); i++) {
@@ -261,5 +277,51 @@ void ExecFloydWarshall(const MyGraph& graph) {
 	cout << '\n';
 
 	cout << "Количество итераций: " << counter << '\n';
+	cout << '\n';
+}
+
+void ExecMinCostFlow(const MyGraph& graph) {
+	int vert1, vert2;
+	do {
+		cout << "Введите номер первой вершины:\n";
+	} while (!GetInputInt(vert1, 1, graph.GetVertexCount()));
+	cout << '\n';
+	do {
+		cout << "Введите номер второй вершины:\n";
+	} while (!GetInputInt(vert2, 1, graph.GetVertexCount(), vert1));
+	cout << '\n';
+	vert1--;
+	vert2--;
+
+	cout << "Матрица пропускных способностей:\n";
+	PrintMatrix(graph.GetMaxFlowMatrix());
+	cout << '\n';
+
+	int maxFlow = graph.fordFulkerson(vert1, vert2);
+	cout << "Максимальный поток: " << maxFlow << '\n';
+	cout << "Используемый поток: " << maxFlow * 2 / 3 << '\n';
+	cout << '\n';
+
+	cout << "Матрица стоимостей:\n";
+	PrintMatrix(graph.GetWeightsMatrix(WeightsType::kMixed));
+	cout << '\n';
+
+	McfRetVals retVals;
+	int mcf = graph.СalcMinCostFlow(vert1, vert2, (maxFlow * 2 / 3), retVals);
+
+	int resCnt = retVals.flows.size();
+	for (int k = 0; k < resCnt; k++) {
+		cout << "Поток величины " << retVals.flows[k] << " со стоимостью " << retVals.costsPerPath[k] << " за единицу потока\n";
+		cout << "по пути: ";
+		for (int i = retVals.paths[k].size() - 1; i > 0; i--) {
+			cout << retVals.paths[k][i] + 1 << " -> ";
+		}
+		cout << retVals.paths[k][0] + 1;
+		cout << '\n';
+		cout << "Итоговая стоимость: " << retVals.flows[k] * retVals.costsPerPath[k] << '\n';
+		cout << '\n';
+	}
+
+	cout << "Величина потока минимальной стоимости: " << mcf << '\n';
 	cout << '\n';
 }

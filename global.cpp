@@ -10,10 +10,17 @@ int FurryRng(double param) {
 	return result;
 }
 
-void PrintMatrix(const vector<vector<int>> vec) {
+void PrintMatrix(const iMx vec) {
 	int n = vec.size();
 	int m = vec[0].size();
+	cout << "   ";
+	for (int i = 0; i < vec[0].size() - 1; i++) {
+		cout << std::setw(3) << i + 1 << " ";
+	}
+	cout << std::setw(3) << vec[0].size() << '\n';
+
 	for (int i = 0; i < n; i++) {
+		cout << std::setw(3) << i + 1;
 		for (int j = 0; j < m; j++) {
 			cout << std::setw(3) << vec[i][j] << " ";
 		}
@@ -21,8 +28,8 @@ void PrintMatrix(const vector<vector<int>> vec) {
 	}
 }
 
-vector<vector<int>> matrixBoolMult(const vector<vector<int>> mxA, const vector<vector<int>> mxB) {
-	vector<vector<int>> resMatrix(mxA.size(), vector<int>(mxA.size(), 0));
+iMx matrixBoolMult(const iMx mxA, const iMx mxB) {
+	iMx resMatrix(mxA.size(), vector<int>(mxA.size(), 0));
 	vector<int> buf;
 	for (int i = 0; i < mxA.size(); i++) {
 		for (int j = 0; j < mxA.size(); j++) {
@@ -37,8 +44,8 @@ vector<vector<int>> matrixBoolMult(const vector<vector<int>> mxA, const vector<v
 	return resMatrix;
 }
 
-vector<vector<int>> matrixAdd(const vector<vector<int>> mxA, const vector<vector<int>> mxB) {
-	vector<vector<int>> resMatrix(mxA.size(), vector<int>(mxA.size(), 0));
+iMx matrixAdd(const iMx mxA, const iMx mxB) {
+	iMx resMatrix(mxA.size(), vector<int>(mxA.size(), 0));
 	for (int i = 0; i < mxA.size(); i++) {
 		for (int j = 0; j < mxA.size(); j++) {
 			resMatrix[i][j] = mxA[i][j] + mxB[i][j];

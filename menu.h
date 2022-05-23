@@ -6,9 +6,11 @@
 //!include
 
 //define:
-#define MENU_ITEMS_MAX 5
+#define MENU_ITEMS_MAX 7
 #define MENU_ITEMS_MIN 0
 //!define
+
+//structs:
 
 //enum:
 enum class MenuItems {
@@ -17,7 +19,9 @@ enum class MenuItems {
 	kReachability,
 	kDijkstra,
 	kBellmanFord,
-	kFloydWarshall
+	kFloydWarshall,
+	kMinCostFlow,
+	kExit
 };
 //!enum
 
@@ -33,13 +37,15 @@ static const char* kMenuItemsArr[] = {
 "Определение возможности построения маршрута",
 "Алгоритм Дейкстры",
 "Алгоритм Беллмана-Форда",
-"Алгоритм Флойда-Уоршелла"
+"Алгоритм Флойда-Уоршелла",
+"Расчёт потока минимальной стоимости",
+"Выход"
 };
 //!const
 
 //functions:
-bool IsContinue();
-bool GetInputInt(int& iInp, int min, int max);
+bool IsContinue(bool overrideFlag = false);
+bool GetInputInt(int& iInp, int min, int max, int forbidden = INT_MAX);
 void PrintMenu();
 
 MyGraph GenGraph();
@@ -48,5 +54,6 @@ void ExecReachability(const MyGraph& graph);
 void ExecDijkstra(const MyGraph& graph);
 void ExecBellmanFord(const MyGraph& graph);
 void ExecFloydWarshall(const MyGraph& graph);
+void ExecMinCostFlow(const MyGraph& graph);
 //!functions
 

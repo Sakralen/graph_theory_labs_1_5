@@ -15,6 +15,20 @@ vector<int> MyGraph::PrepVertices() const {	//генерирует отсортированный вектор 
 			vertexDegrees[i] = vertexCnt - 1 - i;
 		}
 	}
+
+	
+	/*	std::map<int, int> PrintDistrib;
+		for (int i = 0; i < vertexDegrees.size(); i++) {
+			PrintDistrib[vertexDegrees[i]]++;
+		}
+		for (auto i = PrintDistrib.begin(); i != PrintDistrib.end(); ++i) {
+			for (int j = 0; j < i->second; j++) {
+				cout << ':';
+			}
+			cout << " <" << i->first << ">\n";
+		}*/
+
+
 	return vertexDegrees;
 }
 
@@ -50,7 +64,7 @@ void MyGraph::MixWeights(/*WeightsType type*/) {
 	}
 }
 
-void MyGraph::ModifyWeights(vector<vector<int>>& WeightsMatrix, vector<vector<int>>& modified) {
+void MyGraph::ModifyWeights(iMx& WeightsMatrix, iMx& modified) {
 	modified = WeightsMatrix;
 	for (int i = 0; i < vertexCnt; i++) {
 		for (int j = 0; j < vertexCnt; j++) {
@@ -61,9 +75,9 @@ void MyGraph::ModifyWeights(vector<vector<int>>& WeightsMatrix, vector<vector<in
 	}
 }
 
-MyGraph::MyGraph(int n)	 :	vertexCnt(n), adjacencyMatrix(n, vector<int>(n, 0)), posWeightsMatrix(n, vector<int>(n, 0)), 
-							mixedWeightsMatrix(), modPosWeightsMx(), modMixedWeightsMx(), reachMatrix() 
-{
+MyGraph::MyGraph(int n) :	vertexCnt(n), adjacencyMatrix(n, vector<int>(n, 0)), posWeightsMatrix(n, vector<int>(n, 0)),
+							mixedWeightsMatrix(), modPosWeightsMx(), modMixedWeightsMx(), reachMatrix(), maxFlowMx()
+						{
 	if (IS_IN_RANGE(vertexCnt, VERT_CNT_MIN, VERT_CNT_MAX)) {
 		vector<int> vertDegrees = PrepVertices();
 		MyShuffler<int> shuffler;
@@ -84,6 +98,7 @@ MyGraph::MyGraph(int n)	 :	vertexCnt(n), adjacencyMatrix(n, vector<int>(n, 0)), 
 		ModifyWeights(posWeightsMatrix, modPosWeightsMx);
 		ModifyWeights(mixedWeightsMatrix, modMixedWeightsMx);
 		GenReachMatrix();
+		GenMaxFlowMx();
 	}
 	else {
 		throw std::exception();
@@ -94,11 +109,11 @@ int MyGraph::GetVertexCount() const{
 	return vertexCnt;
 }
 
-vector<vector<int>> MyGraph::GetAdjMatrix() const {
+iMx MyGraph::GetAdjMatrix() const {
 	return adjacencyMatrix;
 }
 
-vector<vector<int>> MyGraph::GetWeightsMatrix(WeightsType type) const {
+iMx MyGraph::GetWeightsMatrix(WeightsType type) const {
 	switch (type) {
 	case WeightsType::kPositive:
 		return posWeightsMatrix;
@@ -117,8 +132,8 @@ vector<vector<int>> MyGraph::GetWeightsMatrix(WeightsType type) const {
 	}
 }
 
-vector<vector<int>> MyGraph::ShimbellMult(const vector<vector<int>> mxA, const vector<vector<int>> mxB, ShimbellMode mode) const {
-	vector<vector<int>> resMatrix(vertexCnt, vector<int>(vertexCnt, 0));
+iMx MyGraph::ShimbellMult(const iMx mxA, const iMx mxB, ShimbellMode mode) const {
+	iMx resMatrix(vertexCnt, vector<int>(vertexCnt, 0));
 	vector<int> buf;
 	bool isNotZero;
 	for (int i = 0; i < vertexCnt; i++) {
@@ -147,22 +162,22 @@ vector<vector<int>> MyGraph::ShimbellMult(const vector<vector<int>> mxA, const v
 	return resMatrix;
 }
 
-vector<vector<int>> MyGraph::CalcShimbell(int edgeCnt, ShimbellMode mode) const {
+iMx MyGraph::CalcShimbell(int edgeCnt, ShimbellMode mode) const {
 	//AssignWeights();
-	vector<vector<int>> resMatrix = posWeightsMatrix;
+	iMx resMatrix = posWeightsMatrix;
 	for (int i = 0; i < edgeCnt - 1; i++) {
 		resMatrix = ShimbellMult(resMatrix, posWeightsMatrix, mode);
 	}
 	return resMatrix;
 }
 
-vector<vector<int>> MyGraph::GetReachMatrix() const {
+iMx MyGraph::GetReachMatrix() const {
 	return reachMatrix;
 }
 
 void MyGraph::GenReachMatrix() {
-	vector<vector<int>> boolExpMatrix = adjacencyMatrix;
-	reachMatrix = vector<vector<int>>(vertexCnt, vector<int>(vertexCnt, 0));
+	iMx boolExpMatrix = adjacencyMatrix;
+	reachMatrix = iMx(vertexCnt, vector<int>(vertexCnt, 0));
 	for (int i = 0; i < vertexCnt - 1; i++) {
 		boolExpMatrix = matrixBoolMult(boolExpMatrix, adjacencyMatrix);
 		reachMatrix = matrixAdd(reachMatrix, boolExpMatrix);
@@ -234,8 +249,8 @@ vector<int> MyGraph::Dijkstra_queue(int inpVert, int& counter) const {
 #undef DISTANCE
 #undef VERTEX
 
-vector<vector<int>> MyGraph::RestorePaths(int inpVert, const vector<int>& distances, const vector<vector<int>> weightMx) const {
-	vector<vector<int>> paths(vertexCnt, vector<int>());
+iMx MyGraph::RestorePaths(int inpVert, const vector<int>& distances, const iMx weightMx) const {
+	iMx paths(vertexCnt, vector<int>());
 	int tmp, curVert;
 	for (int i = 0; i < vertexCnt; i++) {
 		if (distances[i]/* != 0*/) {		//== 0 -- исходная вершина
@@ -267,7 +282,7 @@ vector<vector<int>> MyGraph::RestorePaths(int inpVert, const vector<int>& distan
 	return paths;
 }
 
-vector<int> MyGraph::BellmanFord(int inpVert, int& counter) const {
+vector<int> MyGraph::BellmanFord(int inpVert, iMx wieghtsMx, int& counter) const {
 	counter = 0;
 	vector<int> distances(vertexCnt, INF);
 	distances[inpVert] = 0;
@@ -281,8 +296,8 @@ vector<int> MyGraph::BellmanFord(int inpVert, int& counter) const {
 		curVert = dq.front();
 		dq.pop_front();
 		for (int i = curVert + 1; i < vertexCnt; i++, counter++) {
-			if (modMixedWeightsMx[curVert][i] != INF) {
-				newDistance = distances[curVert] + modMixedWeightsMx[curVert][i];
+			if (wieghtsMx[curVert][i] != INF) {
+				newDistance = distances[curVert] + wieghtsMx[curVert][i];
 				if (newDistance < distances[i]) {
 					distances[i] = newDistance;
 					if (std::find(dq.begin(), dq.end(), i) == dq.end()) {		//этой вершины в очереди нет
@@ -300,8 +315,8 @@ vector<int> MyGraph::BellmanFord(int inpVert, int& counter) const {
 	return distances;
 }
 
-vector<vector<int>> MyGraph::FloydWarshall(int& counter) const {
-	vector<vector<int>> distancesMx = modMixedWeightsMx;
+iMx MyGraph::FloydWarshall(int& counter) const {
+	iMx distancesMx = modMixedWeightsMx;
 	for (int i = 0; i < vertexCnt; i++) {
 		for (int j = 0; j < vertexCnt; j++) {
 			for (int k = 0; k < vertexCnt; k++, counter++) {
@@ -317,4 +332,149 @@ vector<vector<int>> MyGraph::FloydWarshall(int& counter) const {
 	}
 
 	return distancesMx;
+}
+
+
+void MyGraph::GenMaxFlowMx() {
+	std::random_device rd;
+	std::mt19937 mersenne(rd());
+	maxFlowMx = adjacencyMatrix;
+	for (int i = 0; i < vertexCnt; i++) {
+		for (int j = i + 1; j < vertexCnt; j++) {
+			if (adjacencyMatrix[i][j]/* != 0*/) {
+				maxFlowMx[i][j] = mersenne() % (FLOW_MAX - 1) + 1;
+			}
+		}
+	}
+}
+
+iMx MyGraph::GetMaxFlowMatrix() const{
+	return maxFlowMx;
+}
+
+iMx MyGraph::AddFictVert() const{
+	std::stack<int> tmp;
+	bool isSource;
+	int tmpVert;
+	for (int i = 0; i < vertexCnt; i++) {
+		isSource = true;
+		for (int j = 0; j < vertexCnt; j++) {
+			if (adjacencyMatrix[j][i]) {
+				isSource = false;
+				break;
+			}
+		}
+		if (isSource) {
+			tmp.push(i);
+		}
+	}
+	if (tmp.size() > 1) { 
+		iMx resMaxFlowMx(vertexCnt + 1, vector<int>(vertexCnt + 1, 0));
+		while (!tmp.empty()) {
+			resMaxFlowMx[0][tmp.top() + 1] = std::accumulate(maxFlowMx[tmp.top()].begin(), maxFlowMx[tmp.top()].end(), 0);
+			tmp.pop();
+		}
+		for (int i = 0; i < vertexCnt; i++) {
+			for (int j = 0; j < vertexCnt; j++) {
+				resMaxFlowMx[i + 1][j + 1] = maxFlowMx[i][j];
+			}
+		}
+		/*PrintMatrix(resMaxFlowMx);
+		cout << '\n';*/
+		return resMaxFlowMx;
+	}
+	else {
+		return maxFlowMx;
+	}
+}
+
+//https://www.geeksforgeeks.org/ford-fulkerson-algorithm-for-maximum-flow-problem/
+bool MyGraph::bfs_FordFulkerson(iMx residualG, int source, int sink, vector<int>& path) const{
+	vector<bool> isVisitedArr(residualG.size(), false);
+	std::queue<int> q;
+	int curVert;
+
+	q.push(source);
+	isVisitedArr[source] = true;
+	path[source] = -1;
+
+	while (!q.empty()) {
+		curVert = q.front();
+		q.pop();
+
+		for (int i = 0; i < residualG.size(); i++) {
+			if ((isVisitedArr[i] == false) && (residualG[curVert][i] > 0)) {
+				path[i] = curVert;
+				if (i == sink) {
+					return true;
+				}
+				q.push(i);
+				isVisitedArr[i] = true;
+			}
+		}
+	}
+	return false;
+}
+
+int MyGraph::fordFulkerson(int source, int sink) const {
+	int tmpSink = sink;
+	iMx residualGraph = AddFictVert();
+	tmpSink++;
+	vector<int> path(residualGraph.size(), 0);
+	int maxFlow = 0;
+	int curFlow;
+	while (bfs_FordFulkerson(residualGraph, source, tmpSink, path)) {
+		curFlow = INF;
+		for (int i = tmpSink; i != source; i = path[i]) {
+			curFlow = std::min(curFlow, residualGraph[path[i]][i]);
+		}
+		for (int i = tmpSink; i != source; i = path[i]) {
+			residualGraph[path[i]][i] -= curFlow;
+			residualGraph[i][path[i]] += curFlow;
+		}
+		maxFlow += curFlow;
+	}
+	return maxFlow;
+}
+
+int MyGraph::СalcMinCostFlow(int source, int sink, int flow, McfRetVals& retVals) const {
+	int curCost = 0, bottleNeck = INF, minCostFlow = 0;
+	int counter; //Заглушка
+	iMx costMx = modMixedWeightsMx, flowMx = maxFlowMx;
+	vector<int> path;
+	vector<i2Pair> edgesToRemove;
+
+	while (flow) {
+		curCost = 0;
+		bottleNeck = INF;
+		edgesToRemove.clear();
+
+		path = RestorePaths(source, BellmanFord(source, costMx, counter), costMx)[sink];
+		retVals.paths.push_back(path);
+		
+		for (int i = path.size() - 1; i > 0; i--) {
+			bottleNeck = std::min(bottleNeck, flowMx[path[i]][path[i - 1]]);
+		}
+		bottleNeck = std::min(bottleNeck, flow);
+		retVals.flows.push_back(bottleNeck);
+
+		for (int i = path.size() - 1; i > 0; i--) {
+			flowMx[path[i]][path[i - 1]] -= bottleNeck;
+			curCost += costMx[path[i]][path[i - 1]];
+			if (flowMx[path[i]][path[i - 1]] == 0) {
+				edgesToRemove.push_back(std::make_pair(path[i], path[i - 1]));
+			}
+		}
+		retVals.costsPerPath.push_back(curCost);
+
+		minCostFlow += bottleNeck * curCost;
+
+		for (auto it = edgesToRemove.begin(); it != edgesToRemove.end(); ++it) {
+			costMx[it->first][it->second] = INF;
+		}
+
+		flow -= bottleNeck;
+	}
+
+	return minCostFlow;
 }
