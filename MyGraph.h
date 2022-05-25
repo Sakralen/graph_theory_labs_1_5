@@ -14,6 +14,8 @@ struct McfRetVals {
 	iMx paths;
 	vector<int> flows;
 	vector<int> costsPerPath;
+	iMx modCostMx;
+	iMx modFlowMx;
 };
 
 enum class ShimbellMode {

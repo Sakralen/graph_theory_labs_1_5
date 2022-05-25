@@ -419,7 +419,11 @@ bool MyGraph::bfs_FordFulkerson(iMx residualG, int source, int sink, vector<int>
 int MyGraph::fordFulkerson(int source, int sink) const {
 	int tmpSink = sink;
 	iMx residualGraph = AddFictVert();
-	tmpSink++;
+	if (residualGraph.size() != vertexCnt) {
+		source++;
+		tmpSink++;
+	}
+
 	vector<int> path(residualGraph.size(), 0);
 	int maxFlow = 0;
 	int curFlow;
@@ -475,6 +479,9 @@ int MyGraph::ÑalcMinCostFlow(int source, int sink, int flow, McfRetVals& retVals
 
 		flow -= bottleNeck;
 	}
+
+	retVals.modCostMx = costMx;
+	retVals.modFlowMx = flowMx;
 
 	return minCostFlow;
 }
