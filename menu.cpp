@@ -303,11 +303,19 @@ void ExecMinCostFlow(const MyGraph& graph) {
 	cout << '\n';
 
 	cout << "Матрица стоимостей:\n";
-	PrintMatrix(graph.GetWeightsMatrix(WeightsType::kMixed));
+	PrintMatrix(graph.GetWeightsMatrix(WeightsType::kModifiedMixed));
 	cout << '\n';
 
 	McfRetVals retVals;
 	int mcf = graph.СalcMinCostFlow(vert1, vert2, (maxFlow * 2 / 3), retVals);
+
+	cout << "Матрица потоков:\n";
+	PrintMatrix(retVals.modFlowMx);
+	cout << '\n';
+
+	cout << "Матрица стоимостей за единицу потока:\n";
+	PrintMatrix(retVals.modCostMx);
+	cout << '\n';
 
 	int resCnt = retVals.flows.size();
 	for (int k = 0; k < resCnt; k++) {

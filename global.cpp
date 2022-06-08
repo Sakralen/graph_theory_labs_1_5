@@ -13,14 +13,14 @@ int FurryRng(double param) {
 void PrintMatrix(const iMx vec) {
 	int n = vec.size();
 	int m = vec[0].size();
-	cout << "   ";
+	cout << "    ";
 	for (int i = 0; i < vec[0].size() - 1; i++) {
 		cout << std::setw(3) << i + 1 << " ";
 	}
 	cout << std::setw(3) << vec[0].size() << '\n';
 
 	for (int i = 0; i < n; i++) {
-		cout << std::setw(3) << i + 1;
+		cout << std::setw(3) << i + 1 << " ";
 		for (int j = 0; j < m; j++) {
 			cout << std::setw(3) << vec[i][j] << " ";
 		}
