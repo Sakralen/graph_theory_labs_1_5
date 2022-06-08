@@ -388,6 +388,40 @@ iMx MyGraph::AddFictVert() const{
 	}
 }
 
+bool MyGraph::bfs(iMx graphMx, int v1, int v2, vector<int>* path, int* counter) const{
+	vector<bool> isVisitedArr(graphMx.size(), false);
+	std::queue<int> q;
+	int curVert;
+
+	q.push(v1);
+	isVisitedArr[v1] = true;
+	if (path) {
+		(*path)[v1] = -1;
+	}
+	
+	while (!q.empty()) {
+		curVert = q.front();
+		q.pop();
+
+		for (int i = 0; i < graphMx.size(); i++) {
+			if (counter) {
+				(*counter)++;
+			}
+			if ((isVisitedArr[i] == false) && (graphMx[curVert][i] != 0)) {
+				if (path) {
+					(*path)[i] = curVert;
+				}
+				if (i == v2) {
+					return true;
+				}
+				q.push(i);
+				isVisitedArr[i] = true;
+			}
+		}
+	}
+	return false;
+}
+
 //https://www.geeksforgeeks.org/ford-fulkerson-algorithm-for-maximum-flow-problem/
 bool MyGraph::bfs_FordFulkerson(iMx residualG, int source, int sink, vector<int>& path) const{
 	vector<bool> isVisitedArr(residualG.size(), false);
@@ -477,4 +511,233 @@ int MyGraph::СalcMinCostFlow(int source, int sink, int flow, McfRetVals& retVals
 	}
 
 	return minCostFlow;
+}
+
+//bool MyGraph::IsReachable(int vert1, int vert2) const {
+//	return reachMatrix[vert1][vert2];
+//}
+//
+//bool MyGraph::IsReachableNotOriented(int vert1, int vert2) const {
+//	return (reachMatrix[vert1][vert2] || reachMatrix[vert2][vert1]);
+//}
+
+priority_queue<Edge, vector<Edge>, std::greater<Edge>> MyGraph::SortEdges(iMx weightsMx) const {
+	priority_queue<Edge, vector<Edge>, std::greater<Edge>> pq;
+
+	for (int i = 0; i < vertexCnt; i++) {
+		for (int j = 0; j < vertexCnt; j++) {
+			if (weightsMx[i][j] != 0) {
+				pq.push(Edge(i, j, weightsMx[i][j]));
+			}
+		}
+	}
+
+	return pq;
+}
+
+iMx MyGraph::Kruskal(iMx weightsMx, int* counter, int* sum) const {
+	iMx minSpanTree = iMx(vertexCnt, vector<int>(vertexCnt, 0));
+	priority_queue<Edge, vector<Edge>, std::greater<Edge>> pq = SortEdges(weightsMx);
+	Edge edge;
+	if (counter) {
+		(*counter) = pow(vertexCnt, 2); //итераций на сортировку
+	}
+
+	while (!pq.empty()) {
+		edge = pq.top();
+		pq.pop();
+		if (!bfs(minSpanTree, edge.vert1, edge.vert2, nullptr, counter)) {
+			minSpanTree[edge.vert1][edge.vert2] = weightsMx[edge.vert1][edge.vert2];
+			minSpanTree[edge.vert2][edge.vert1] = weightsMx[edge.vert1][edge.vert2];
+		}
+		if (counter) {
+			(*counter)++;
+		}
+	}
+
+	if (sum) {
+		(*sum) = 0;
+		for (int i = 0; i < vertexCnt; i++) {
+			for (int j = i + 1; j < vertexCnt; j++) {
+				if (minSpanTree[i][j] != 0) {
+					(*sum) += minSpanTree[i][j];
+				}
+			}
+		}
+	}
+
+	return minSpanTree;
+}
+
+//https://www.geeksforgeeks.org/prims-minimum-spanning-tree-mst-greedy-algo-5/
+iMx MyGraph::Prim(iMx weightsMx, int* counter, int* sum) const {
+	iMx minSpanTree = iMx(vertexCnt, vector<int>(vertexCnt, 0));
+	vector<int> mstPath(vertexCnt, 0);
+	mstPath[0] = -1;
+	vector<int> mstKeys(vertexCnt, INF); //ключи -- минимальный вес ребра, инцидентного вершине
+	mstKeys[0] = 0;
+	vector<bool> isInMst(vertexCnt, false);
+	int minKey, minIndex;
+	if (counter) {
+		(*counter) = 0;
+	}
+
+	for (int i = 0; i < vertexCnt; i++) {
+		for (int j = 0; j < i; j++) {
+			weightsMx[i][j] = weightsMx[j][i];
+		}
+	}
+
+	for (int i = 0; i < vertexCnt - 1; i++) {
+		minKey = INF;
+		for (int j = 0; j < vertexCnt; j++) {
+			if ((isInMst[j] == false) && (mstKeys[j] < minKey)) {
+				minIndex = j;
+				minKey = mstKeys[j];
+			}
+			if (counter) {
+				(*counter)++;
+			}
+		}
+		isInMst[minIndex] = true;
+
+		for (int j = 0; j < vertexCnt; j++) {
+			if ((weightsMx[minIndex][j] != 0) && (isInMst[j] == false) && (weightsMx[minIndex][j] < mstKeys[j])) {
+				mstKeys[j] = weightsMx[minIndex][j];
+				mstPath[j] = minIndex;
+			}
+			if (counter) {
+				(*counter)++;
+			}
+		}
+		stop
+	}
+
+	for (int i = 1; i < vertexCnt; i++) {
+		minSpanTree[i][mstPath[i]] = weightsMx[i][mstPath[i]];
+		minSpanTree[mstPath[i]][i] = weightsMx[i][mstPath[i]];
+	}
+
+	if (sum) {
+		(*sum) = 0;
+		for (int i = 0; i < vertexCnt; i++) {
+			for (int j = i + 1; j < vertexCnt; j++) {
+				if (minSpanTree[i][j] != 0) {
+					(*sum) += minSpanTree[i][j];
+				}
+			}
+		}
+	}
+
+	return minSpanTree;
+}
+
+iMx MyGraph::GenKirchhoff() const {
+	iMx kirchhoffMx = iMx(vertexCnt, vector<int>(vertexCnt, 0));
+	int vertDeg;
+	iMx modAdjMx = adjacencyMatrix;
+
+	for (int i = 0; i < vertexCnt; i++) {
+		for (int j = 0; j < i; j++) {
+			modAdjMx[i][j] = adjacencyMatrix[j][i];
+		}
+	}
+
+	for (int i = 0; i < vertexCnt; i++) {
+		vertDeg = 0;
+		for (int j = 0; j < vertexCnt; j++) {
+			if (modAdjMx[i][j]) {
+				kirchhoffMx[i][j] = -1;
+				vertDeg++;
+			}
+		}
+		kirchhoffMx[i][i] = vertDeg;
+	}
+	return kirchhoffMx;
+}
+
+int MyGraph::CalcSpanTreesCnt() const {
+	iMx kirchhoff = GenKirchhoff();
+	iMx kirchhoffMinor = iMx(vertexCnt - 1, vector<int>(vertexCnt - 1, 0));
+	for (int i = 0; i < vertexCnt - 1; i++) {
+		for (int j = 0; j < vertexCnt - 1; j++) {
+			kirchhoffMinor[i][j] = kirchhoff[i][j];
+		}
+	}
+	return matrixDet(kirchhoffMinor);
+}
+
+void MyGraph::PruferEncode(iMx& weightsMx, vector<int>& pruferCode, vector<int>& pruferWeights) const {
+	if (pruferCode.size() == weightsMx.size() - 2) {
+		for (int i = 0; i < weightsMx.size(); i++) {
+			for (int j = 0; j < weightsMx.size(); j++) {
+				if (weightsMx[i][j] != 0) {
+					pruferCode.push_back(i + 1);
+					pruferWeights.push_back(weightsMx[i][j]);
+					return;
+				}
+			}
+		}
+	}
+
+	Edge edge;
+	iMx tmpWeightsMx = weightsMx;
+	int cnt;
+	for (int i = 0; i < weightsMx.size(); i++) {
+		cnt = 0;
+		for (int j = 0; j < weightsMx.size(); j++) {
+			if (weightsMx[i][j] != 0) {
+				if (cnt > 1) {
+					break;
+				}
+				else {
+					edge.vert2 = j;
+					cnt++;
+				}
+			}		
+		}
+		if (cnt == 1) {
+			edge.vert1 = i;
+			edge.weight = weightsMx[edge.vert1][edge.vert2];
+			break;
+		}
+	}
+
+	pruferCode.push_back(edge.vert2 + 1);
+	pruferWeights.push_back(edge.weight);
+    tmpWeightsMx[edge.vert1][edge.vert2] = tmpWeightsMx[edge.vert2][edge.vert1] = 0;
+
+	//cout << "Removed: " << edge.vert1 << "\n\n";
+	//PrintMatrix(tmpWeightsMx);
+
+	PruferEncode(tmpWeightsMx, pruferCode, pruferWeights);
+}
+
+iMx MyGraph::PruferDecode(vector<int>& pruferCode, vector<int>& pruferWeights) const {
+	iMx weightMx = iMx(pruferCode.size() + 1, vector<int>(pruferCode.size() + 1, 0));
+	vector<bool> isUsed(weightMx.size(), false);
+	queue<int> qPruferCode, qPruferWeights;
+	for (int i = 0; i < pruferCode.size(); i++) {
+		qPruferCode.push(pruferCode[i] - 1);
+		qPruferWeights.push(pruferWeights[i]);
+	}
+	int tmpVert, tmpWeight;
+
+	while (!qPruferCode.empty()) {
+		for (int i = 0; i < weightMx.size(); i++) {
+			if (qPruferCode._Get_container().end() == std::find(qPruferCode._Get_container().begin(), qPruferCode._Get_container().end(), i)) {
+				if (isUsed[i] == false) {
+					isUsed[i] = true;
+					tmpVert = qPruferCode.front();
+					tmpWeight = qPruferWeights.front();
+					weightMx[i][tmpVert] = weightMx[tmpVert][i] = tmpWeight;
+					qPruferCode.pop();
+					qPruferWeights.pop();
+					break;
+				}
+			}
+		}
+	}
+
+	return weightMx;
 }

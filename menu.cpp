@@ -325,3 +325,84 @@ void ExecMinCostFlow(const MyGraph& graph) {
 	cout << "Величина потока минимальной стоимости: " << mcf << '\n';
 	cout << '\n';
 }
+
+void ExecKruskal(const MyGraph& graph) {
+	int counter = 0, sum = 0;
+	iMx minSpanTree = graph.Kruskal(graph.GetWeightsMatrix(WeightsType::kPositive), &counter, &sum);
+
+	cout << "Матрица весов кратчайшего остова:\n";
+	PrintMatrix(minSpanTree);
+	cout << '\n';
+
+	cout << "Вес кратчайшего остова: " << sum << '\n';
+	cout << '\n';
+
+	cout << "Количество итераций: " << counter << '\n';
+	cout << '\n';
+}
+
+void ExecPrim(const MyGraph& graph) {
+	int counter = 0, sum = 0;
+	iMx minSpanTree = graph.Prim(graph.GetWeightsMatrix(WeightsType::kPositive), &counter, &sum);
+
+	cout << "Матрица весов кратчайшего остова:\n";
+	PrintMatrix(minSpanTree);
+	cout << '\n';
+
+	cout << "Вес кратчайшего остова: " << sum << '\n';
+	cout << '\n';
+
+	cout << "Количество итераций: " << counter << '\n';
+	cout << '\n';
+}
+
+void ExecSpanTreesCnt(const MyGraph& graph) {
+	cout << "Матрица Кирхгофа:\n";
+	PrintMatrix(graph.GenKirchhoff());
+	cout << '\n';
+
+	cout << "Количество остовных деревьев в графе: " << graph.CalcSpanTreesCnt() << '\n';
+	cout << '\n';
+}
+
+void ExecPrufer(const MyGraph& graph) {
+	iMx weightMx = graph.Kruskal(graph.GetWeightsMatrix(WeightsType::kPositive));
+	iMx decodedMx;
+	vector<int> prufCode, prufWeights;
+
+	cout << "Матрица весов кратчайшего остова:\n";
+	PrintMatrix(weightMx);
+	cout << '\n';
+	graph.PruferEncode(weightMx, prufCode, prufWeights);
+
+	cout << "Код Прюфера:\n";
+	//if (weightMx.size() > 2) {
+		for (int i = 0; i < prufCode.size(); i++) {
+			cout << prufCode[i] << ' ';
+		}
+	/* }
+	else {
+		cout << "Код Прюфера для дерева, состоящего из двух рёбер, отсутствует.\n";
+	}*/
+	cout << '\n';
+
+	cout << "Веса рёбер:\n";
+	for (int i = 0; i < prufWeights.size(); i++) {
+		cout << prufWeights[i] << ' ';
+	}
+	cout << '\n';
+
+	decodedMx = graph.PruferDecode(prufCode, prufWeights);
+	cout << "\nВосстановленная матрица весов кратчайшего остова:\n";
+	PrintMatrix(decodedMx);
+	cout << '\n';
+
+	if (decodedMx == weightMx) {
+		cout << "Декодирование верно.\n";
+	}
+	else {
+		cout << "Декодирование неверно.\n";
+	}
+
+	cout << '\n';
+}

@@ -53,3 +53,41 @@ iMx matrixAdd(const iMx mxA, const iMx mxB) {
 	}
 	return resMatrix;
 }
+
+int factorial(int a) {
+	if (a == 1) {
+		return 1;
+	}
+	return a * factorial(a - 1);
+}
+
+int matrixDet(const iMx mx) {
+	if (mx.size() == 1) {
+		return mx[0][0];
+	}
+	if (mx.size() == 2) {
+		return mx[0][0] * mx[1][1] - mx[0][1] * mx[1][0];
+	}
+	int det = 0;
+	iMx tmpMx;
+	for (int k = 0; k < mx.size(); k++) {
+		tmpMx = iMx(mx.size() - 1, vector<int>(mx.size() - 1, 0));
+		for (int i = 0; i < mx.size() - 1; i++) {
+			for (int j = 0; j < mx.size() - 1; j++) {
+				if (i >= k) {
+					tmpMx[i][j] = mx[i + 1][j + 1];
+				}
+				else {
+					tmpMx[i][j] = mx[i][j + 1];
+				}
+			}
+		}
+		if (k % 2 == 0) {
+			det += mx[0][k] * matrixDet(tmpMx);
+		}
+		else {
+			det -= mx[0][k] * matrixDet(tmpMx);
+		}
+	}
+	return det;
+}

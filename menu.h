@@ -6,7 +6,7 @@
 //!include
 
 //define:
-#define MENU_ITEMS_MAX 7
+#define MENU_ITEMS_MAX 11
 #define MENU_ITEMS_MIN 0
 //!define
 
@@ -21,6 +21,10 @@ enum class MenuItems {
 	kBellmanFord,
 	kFloydWarshall,
 	kMinCostFlow,
+	kKruskal,
+	kPrim,
+	kSpanTreesCnt,
+	kPrufer,
 	kExit
 };
 //!enum
@@ -39,6 +43,10 @@ static const char* kMenuItemsArr[] = {
 "Алгоритм Беллмана-Форда",
 "Алгоритм Флойда-Уоршелла",
 "Расчёт потока минимальной стоимости",
+"Алгоритм Краскала",
+"Алгоритм Прима",
+"Подсчёт количества остовных деревьев в графе",
+"Закодировать граф кодом Прюфера",
 "Выход"
 };
 //!const
@@ -55,5 +63,9 @@ void ExecDijkstra(const MyGraph& graph);
 void ExecBellmanFord(const MyGraph& graph);
 void ExecFloydWarshall(const MyGraph& graph);
 void ExecMinCostFlow(const MyGraph& graph);
+void ExecKruskal(const MyGraph& graph);
+void ExecPrim(const MyGraph& graph);
+void ExecSpanTreesCnt(const MyGraph& graph);
+void ExecPrufer(const MyGraph& graph);
 //!functions
 

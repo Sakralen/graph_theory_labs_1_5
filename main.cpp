@@ -10,6 +10,8 @@ void main() {
 
 	MyGraph graph = GenGraph();
 
+	//ExecPrufer(graph);
+
 	do {
 		PrintMenu();
 		cout << '\n';
@@ -41,6 +43,18 @@ void main() {
 				break;
 			case MenuItems::kMinCostFlow:
 				ExecMinCostFlow(graph);
+				break;
+			case MenuItems::kKruskal:
+				ExecKruskal(graph);
+				break;
+			case MenuItems::kPrim:
+				ExecPrim(graph);
+				break;
+			case MenuItems::kSpanTreesCnt:
+				ExecSpanTreesCnt(graph);
+				break;
+			case MenuItems::kPrufer:
+				ExecPrufer(graph);
 				break;
 			case MenuItems::kExit:
 				overrideFlag = true;

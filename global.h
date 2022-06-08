@@ -57,4 +57,6 @@ void PrintMatrix(const iMx vec);
 
 iMx matrixBoolMult(const iMx mxA, const iMx mxB);
 iMx matrixAdd(const iMx mxA, const iMx mxB);
+int factorial(int a);
+int matrixDet(const iMx mx);
 //!functions
