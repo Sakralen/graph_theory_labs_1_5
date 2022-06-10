@@ -46,7 +46,7 @@ enum class WeightsType {
 	kModifiedMixed
 };
 
-enum class IsEulerRes {
+enum class IsEulerOrHamilton {
 	kFalse2Vert,
 	kFalseUnmodifiable,
 	kFalseModifiable,
@@ -110,7 +110,9 @@ public:
 	void PruferEncode(iMx& weightsMx, vector<int>& pruferCode, vector<int>& pruferWeights) const;
 	iMx PruferDecode(vector<int>& pruferCode, vector<int>& pruferWeights) const;
 
-	IsEulerRes IsEuler(iMx weightsMx) const;
-	vector<int> EulerCycles(iMx weightsMx, iMx& modWeightsMx, IsEulerRes& isEulerRes) const;
+	IsEulerOrHamilton IsEuler(iMx weightsMx) const;
+	vector<int> EulerCycles(iMx weightsMx, iMx& modWeightsMx, IsEulerOrHamilton& isEulerRes) const;
+	vector<int> Hamilton(iMx weightsMx, iMx& modWeightsMx, IsEulerOrHamilton& isHamRes, int& minLen) const;
+	void FindHamiltonCycles(ofstream& ofs, iMx& weightsMx, vector<int>& path, vector<int>& minPath, int& len, int& minLen) const;
 };
 

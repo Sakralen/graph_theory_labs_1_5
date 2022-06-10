@@ -416,34 +416,62 @@ void ExecPrufer(const MyGraph& graph) {
 }
 
 void ExecEulerCycle(const MyGraph& graph) {
-	IsEulerRes res;
+	IsEulerOrHamilton res;
 	iMx resWeightMx;
 	vector<int> eulerPath = graph.EulerCycles(graph.GetWeightsMatrix(WeightsType::kPositive), resWeightMx, res);
 
 	switch (res) {
-	case IsEulerRes::kFalse2Vert:
+	case IsEulerOrHamilton::kFalse2Vert:
 		cout << "Граф из двух вершин не имеет эйлеров цикл!\n";
 		break;
-	case IsEulerRes::kFalseUnmodifiable:
+	case IsEulerOrHamilton::kFalseUnmodifiable:
 		cout << "Граф не является эйлеровым. Модифицикация до эйлерова графа невозможна.\n";
 		cout << "Весовая матрица эйлерова графа:\n";
 		PrintMatrix(resWeightMx);
 		cout << '\n';
 		break;
-	case IsEulerRes::kFalseModifiable:
+	case IsEulerOrHamilton::kFalseModifiable:
 		cout << "Граф не является эйлеровым. Модифицификация до эйлерова графа возможна.\n\n";
-	case IsEulerRes::kTrue:
+	case IsEulerOrHamilton::kTrue:
 		cout << "Весовая матрица эйлерова графа:\n";
 		PrintMatrix(resWeightMx);
 		cout << '\n';
 		cout << "Эйлеров цикл:\n";
-		for (int i = 0; i < resWeightMx.size() - 1; i++) {
+		for (int i = 0; i < eulerPath.size() - 1; i++) {
 			cout << eulerPath[i] + 1 << " -> ";
 		}
-		cout << eulerPath[resWeightMx.size() - 1] + 1 << '\n';
+		cout << eulerPath[eulerPath.size() - 1] + 1 << '\n';
 		break;
 	default:
 		break;
 	}
 	cout << '\n';
+}
+
+void ExecHamiltonCycle(const MyGraph& graph) {
+	IsEulerOrHamilton res;
+	iMx resWeightMx;
+	int minLen;
+	vector<int> minPath = graph.Hamilton(graph.GetWeightsMatrix(WeightsType::kPositive), resWeightMx, res, minLen);
+
+	switch (res) {
+	case IsEulerOrHamilton::kFalse2Vert:
+		cout << "Граф из двух вершин не имеет гамильтонов цикл!\n";
+		break;
+	case IsEulerOrHamilton::kFalseModifiable:
+		cout << "Граф не является гамильтоновым. Модифицификация до гамильтонова графа возможна.\n\n";
+	case IsEulerOrHamilton::kTrue:
+		cout << "Весовая матрица гамильтонова графа:\n";
+		PrintMatrix(resWeightMx);
+		cout << '\n';
+		cout << "Минимальный гамильтонов цикл:\n";
+		for (int i = 0; i < minPath.size() - 1; i++) {
+			cout << minPath[i] + 1 << " -> ";
+		}
+		cout << minPath[minPath.size() - 1] + 1 << '\n';
+		cout << "Вес пути: " << minLen << '\n';
+		break;
+	default:
+		break;
+	}
 }

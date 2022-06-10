@@ -769,14 +769,14 @@ vector<int> MyGraph::CalcDegrees(iMx weightsMx) const {
 	return vertDeg;
 }
 
-IsEulerRes MyGraph::IsEuler(iMx weightsMx) const {
+IsEulerOrHamilton MyGraph::IsEuler(iMx weightsMx) const {
 	if (vertexCnt == 2) {
-		return IsEulerRes::kFalse2Vert;
+		return IsEulerOrHamilton::kFalse2Vert;
 	}
 
 	iMx unorWeightsMx = MakeUnoriented(weightsMx);
 	vector<int> vertDeg = CalcDegrees(unorWeightsMx);
-	IsEulerRes result;
+	IsEulerOrHamilton result;
 
 	int counter = 0;
 	bool isNotEuler = false;
@@ -784,28 +784,28 @@ IsEulerRes MyGraph::IsEuler(iMx weightsMx) const {
 		if ((vertDeg[i] % 2) == 1) {
 			isNotEuler = true;
 			if (vertDeg[i] == (weightsMx.size() - 1)) {
-				return IsEulerRes::kFalseUnmodifiable;
+				return IsEulerOrHamilton::kFalseUnmodifiable;
 			}		
 		}	
 	}
 
 	if (counter == 1) {
-		return IsEulerRes::kFalseModifiable;
+		return IsEulerOrHamilton::kFalseModifiable;
 	}
 
-	return IsEulerRes::kTrue;
+	return IsEulerOrHamilton::kTrue;
 }
 
-vector<int> MyGraph::EulerCycles(iMx weightsMx, iMx& modWeightsMx, IsEulerRes& isEulerRes) const {
+vector<int> MyGraph::EulerCycles(iMx weightsMx, iMx& modWeightsMx, IsEulerOrHamilton& isEulerRes) const {
 	isEulerRes = IsEuler(weightsMx);
-	if (isEulerRes == IsEulerRes::kFalse2Vert || isEulerRes == IsEulerRes::kFalseUnmodifiable) {
+	if (isEulerRes == IsEulerOrHamilton::kFalse2Vert || isEulerRes == IsEulerOrHamilton::kFalseUnmodifiable) {
 		return vector<int>();
 	}
 
 	modWeightsMx = MakeUnoriented(weightsMx);
 	vector<int> vertDeg = CalcDegrees(modWeightsMx);
 
-	if (isEulerRes == IsEulerRes::kFalseModifiable) {
+	if (isEulerRes == IsEulerOrHamilton::kFalseModifiable) {
 		bool isEuler = false, isChanged = false;
 		int vertToConnect = -1;
 		std::random_device rd;
@@ -846,7 +846,7 @@ vector<int> MyGraph::EulerCycles(iMx weightsMx, iMx& modWeightsMx, IsEulerRes& i
 					}
 
 					if (vertToConnect == -1) {
-						isEulerRes = IsEulerRes::kFalseUnmodifiable;
+						isEulerRes = IsEulerOrHamilton::kFalseUnmodifiable;
 						return vector<int>();
 					}
 				}
@@ -889,3 +889,109 @@ vector<int> MyGraph::EulerCycles(iMx weightsMx, iMx& modWeightsMx, IsEulerRes& i
 	return eulerPath;
 }
 
+vector<int> MyGraph::Hamilton(iMx weightsMx, iMx& modWeightsMx, IsEulerOrHamilton& isHamRes, int& minLen) const {
+	if (weightsMx.size() == 2) {
+		isHamRes = IsEulerOrHamilton::kFalse2Vert;
+		return vector<int>();
+	}
+
+
+	modWeightsMx = MakeUnoriented(weightsMx);
+	vector<int> vertDeg;
+	bool isHamilton = true, isChanged = false;
+	isHamRes = IsEulerOrHamilton::kTrue;
+	int vertToConnect = -1;
+	std::random_device rd;
+	std::mt19937 mersenne(rd());
+
+	//for (int i = 0; i < weightsMx.size(); i++) {
+	//	for (int j = 0; j < weightsMx.size(); j++) {
+	//		if ((i != j) && (modWeightsMx[i][j] == 0)) {
+	//			isHamilton = false;
+	//			modWeightsMx[i][j] = modWeightsMx[j][i] = mersenne() % (WEIGHT_MAX - 1) + 1;
+	//		}
+	//	}
+	//}
+
+	vertDeg = CalcDegrees(modWeightsMx);
+	for (int i = 0; i < weightsMx.size(); i++) {
+		if (vertDeg[i] < (vertexCnt / 2)) {
+			isHamilton = false;
+			isHamRes = IsEulerOrHamilton::kFalseModifiable;
+			break;
+		}
+	}
+
+	while (!isHamilton) {
+		isChanged = false;
+		for (int i = 0; i < weightsMx.size(); i++) {
+			vertToConnect = -1;
+			if (vertDeg[i] < (vertexCnt / 2)) {
+				for (int j = 0; j < weightsMx.size(); j++) {
+					if ((modWeightsMx[i][j] == 0) && (i != j)) {
+						vertToConnect = j;
+						if (vertDeg[j] < (vertexCnt / 2)) {
+							isChanged = true;
+							vertDeg[i]++;
+							vertDeg[j]++;
+							modWeightsMx[i][j] = modWeightsMx[j][i] = mersenne() % (WEIGHT_MAX - 1) + 1;
+							break;
+						}
+					}
+				}
+				if (!isChanged && (vertToConnect != -1)) {
+					isChanged = true;
+					vertDeg[i]++;
+					modWeightsMx[i][vertToConnect] = modWeightsMx[vertToConnect][i] = mersenne() % (WEIGHT_MAX - 1) + 1;
+				}
+			}
+		}
+		if (!isChanged) {
+			isHamilton = true;
+		}
+	}
+
+	ofstream ofs(OUTPUT_FILE_NAME);
+	vector<int> path;
+	path.push_back(0);
+	vector<int> minPath;
+	int len = 0;
+	minLen = INT_MAX;
+
+	FindHamiltonCycles(ofs, modWeightsMx, path, minPath, len, minLen);
+
+	return minPath;
+}
+
+void MyGraph::FindHamiltonCycles(ofstream& ofs, iMx& weightsMx, vector<int>& path, vector<int>& minPath, int& len, int& minLen) const {
+	if (path.size() == weightsMx.size()) {
+		if (weightsMx[path.size() - 1][0] != 0) {
+			len = weightsMx[path.size() - 1][0];
+			if (len < minLen) {
+				minLen = len;
+				minPath = path;
+			}
+
+			for (int i = 0; i < path.size(); i++) {
+				ofs << path[i] << ' ';
+			}
+			ofs << "Weight: " << len << '\n';
+
+			path.pop_back();
+		}
+		return;
+	}
+
+	bool isInPath = false;
+	int tmpLen;
+	for (int i = 0; i < weightsMx.size(); i++) {
+		if (weightsMx[path.size() - 1][i] != 0) {
+			if (path.end() != find(path.begin(), path.end(), i)) {
+				tmpLen = len + weightsMx[path.size() - 1][i];
+				path.push_back(i);
+				FindHamiltonCycles(ofs, weightsMx, path, minPath, tmpLen, minLen);
+				path.pop_back();
+			}
+		}
+	}
+}

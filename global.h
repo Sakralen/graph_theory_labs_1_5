@@ -12,6 +12,7 @@
 #include <queue>
 #include <map>
 #include <numeric>
+#include <fstream>
 
 #include "MyShuffler.h"
 //!include
@@ -29,6 +30,7 @@ using std::priority_queue;
 using std::pair;
 using std::queue;
 using std::deque;
+using std::ofstream;
 //!using
 
 //typedef:
@@ -43,6 +45,8 @@ typedef vector<vector<int>> iMx;
 #define FURRY_DISTRIB_PARAM 0.6
 
 #define IS_IN_RANGE(x, min, max) ((x >= min) && (x <= max))
+
+#define OUTPUT_FILE_NAME "output.txt"
 //!define
 
 //const:

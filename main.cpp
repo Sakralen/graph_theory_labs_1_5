@@ -59,6 +59,9 @@ void main() {
 			case MenuItems::kEulerCycle:
 				ExecEulerCycle(graph);
 				break;
+			case MenuItems::kHamiltonCycle:
+				ExecHamiltonCycle(graph);
+				break;
 			case MenuItems::kExit:
 				overrideFlag = true;
 				break;
