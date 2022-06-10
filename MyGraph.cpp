@@ -952,6 +952,9 @@ vector<int> MyGraph::Hamilton(iMx weightsMx, iMx& modWeightsMx, IsEulerOrHamilto
 	}
 
 	ofstream ofs(OUTPUT_FILE_NAME);
+	if (ofs.is_open()) {
+		stop;
+	}
 	vector<int> path;
 	path.push_back(0);
 	vector<int> minPath;
@@ -960,21 +963,24 @@ vector<int> MyGraph::Hamilton(iMx weightsMx, iMx& modWeightsMx, IsEulerOrHamilto
 
 	FindHamiltonCycles(ofs, modWeightsMx, path, minPath, len, minLen);
 
+	ofs.close();
 	return minPath;
 }
 
 void MyGraph::FindHamiltonCycles(ofstream& ofs, iMx& weightsMx, vector<int>& path, vector<int>& minPath, int& len, int& minLen) const {
 	if (path.size() == weightsMx.size()) {
 		if (weightsMx[path.size() - 1][0] != 0) {
-			len = weightsMx[path.size() - 1][0];
+			len += weightsMx[path.size() - 1][0];
+			path.push_back(0);
 			if (len < minLen) {
 				minLen = len;
 				minPath = path;
 			}
 
-			for (int i = 0; i < path.size(); i++) {
-				ofs << path[i] << ' ';
+			for (int i = 0; i < path.size() - 1; i++) {
+				ofs << path[i] + 1 << " -> ";
 			}
+			ofs << path[path.size() - 1] + 1 << '\t';
 			ofs << "Weight: " << len << '\n';
 
 			path.pop_back();
@@ -986,7 +992,7 @@ void MyGraph::FindHamiltonCycles(ofstream& ofs, iMx& weightsMx, vector<int>& pat
 	int tmpLen;
 	for (int i = 0; i < weightsMx.size(); i++) {
 		if (weightsMx[path.size() - 1][i] != 0) {
-			if (path.end() != find(path.begin(), path.end(), i)) {
+			if (path.end() == find(path.begin(), path.end(), i)) {
 				tmpLen = len + weightsMx[path.size() - 1][i];
 				path.push_back(i);
 				FindHamiltonCycles(ofs, weightsMx, path, minPath, tmpLen, minLen);
