@@ -798,7 +798,7 @@ IsEulerOrHamilton MyGraph::IsEuler(iMx weightsMx) const {
 
 vector<int> MyGraph::EulerCycles(iMx weightsMx, iMx& modWeightsMx, IsEulerOrHamilton& isEulerRes) const {
 	isEulerRes = IsEuler(weightsMx);
-	if (isEulerRes == IsEulerOrHamilton::kFalse2Vert || isEulerRes == IsEulerOrHamilton::kFalseUnmodifiable) {
+	if (isEulerRes == IsEulerOrHamilton::kFalse2Vert/* || isEulerRes == IsEulerOrHamilton::kFalseUnmodifiable*/) {
 		return vector<int>();
 	}
 
@@ -847,7 +847,7 @@ vector<int> MyGraph::EulerCycles(iMx weightsMx, iMx& modWeightsMx, IsEulerOrHami
 
 					if (vertToConnect == -1) {
 						isEulerRes = IsEulerOrHamilton::kFalseUnmodifiable;
-						return vector<int>();
+						//return vector<int>();
 					}
 				}
 			}
@@ -855,6 +855,23 @@ vector<int> MyGraph::EulerCycles(iMx weightsMx, iMx& modWeightsMx, IsEulerOrHami
 			if (!isChanged) {
 				isEuler = true;
 				//isEulerRes = IsEulerRes::kTrue;
+			}
+		}
+	}
+
+	if (isEulerRes == IsEulerOrHamilton::kFalseUnmodifiable) {
+		int vertToDisconnect = -1;
+		for (int i = 0; i < modWeightsMx.size(); i++) {
+			if (vertDeg[i] % 2 == 1) {
+				vertToDisconnect = i;
+				break;
+			}
+		}
+		for (int i = vertToDisconnect + 1; i < modWeightsMx.size(); i++) {
+			if ((vertDeg[i] % 2 == 1) && (modWeightsMx[vertToDisconnect][i])) {
+				vertDeg[vertToDisconnect]--;
+				vertDeg[i]--;
+				modWeightsMx[vertToDisconnect][i] = modWeightsMx[i][vertToDisconnect] = 0;
 			}
 		}
 	}
@@ -969,8 +986,8 @@ vector<int> MyGraph::Hamilton(iMx weightsMx, iMx& modWeightsMx, IsEulerOrHamilto
 
 void MyGraph::FindHamiltonCycles(ofstream& ofs, iMx& weightsMx, vector<int>& path, vector<int>& minPath, int& len, int& minLen) const {
 	if (path.size() == weightsMx.size()) {
-		if (weightsMx[path.size() - 1][0] != 0) {
-			len += weightsMx[path.size() - 1][0];
+		if (weightsMx[path[path.size() - 1]][0] != 0) {
+			len += weightsMx[path[path.size() - 1]][0];
 			path.push_back(0);
 			if (len < minLen) {
 				minLen = len;

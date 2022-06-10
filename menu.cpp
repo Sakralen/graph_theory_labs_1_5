@@ -425,11 +425,8 @@ void ExecEulerCycle(const MyGraph& graph) {
 		cout << "Граф из двух вершин не имеет эйлеров цикл!\n";
 		break;
 	case IsEulerOrHamilton::kFalseUnmodifiable:
-		cout << "Граф не является эйлеровым. Модифицикация до эйлерова графа невозможна.\n";
-		cout << "Весовая матрица эйлерова графа:\n";
-		PrintMatrix(resWeightMx);
-		cout << '\n';
-		break;
+		/*cout << "Граф не является эйлеровым. Модифицикация до эйлерова графа невозможна.\n";
+		break;*/
 	case IsEulerOrHamilton::kFalseModifiable:
 		cout << "Граф не является эйлеровым. Модифицификация до эйлерова графа возможна.\n\n";
 	case IsEulerOrHamilton::kTrue:
@@ -474,4 +471,5 @@ void ExecHamiltonCycle(const MyGraph& graph) {
 	default:
 		break;
 	}
+	cout << '\n';
 }
