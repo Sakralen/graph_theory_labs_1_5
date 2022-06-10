@@ -414,3 +414,36 @@ void ExecPrufer(const MyGraph& graph) {
 
 	cout << '\n';
 }
+
+void ExecEulerCycle(const MyGraph& graph) {
+	IsEulerRes res;
+	iMx resWeightMx;
+	vector<int> eulerPath = graph.EulerCycles(graph.GetWeightsMatrix(WeightsType::kPositive), resWeightMx, res);
+
+	switch (res) {
+	case IsEulerRes::kFalse2Vert:
+		cout << "Граф из двух вершин не имеет эйлеров цикл!\n";
+		break;
+	case IsEulerRes::kFalseUnmodifiable:
+		cout << "Граф не является эйлеровым. Модифицикация до эйлерова графа невозможна.\n";
+		cout << "Весовая матрица эйлерова графа:\n";
+		PrintMatrix(resWeightMx);
+		cout << '\n';
+		break;
+	case IsEulerRes::kFalseModifiable:
+		cout << "Граф не является эйлеровым. Модифицификация до эйлерова графа возможна.\n\n";
+	case IsEulerRes::kTrue:
+		cout << "Весовая матрица эйлерова графа:\n";
+		PrintMatrix(resWeightMx);
+		cout << '\n';
+		cout << "Эйлеров цикл:\n";
+		for (int i = 0; i < resWeightMx.size() - 1; i++) {
+			cout << eulerPath[i] + 1 << " -> ";
+		}
+		cout << eulerPath[resWeightMx.size() - 1] + 1 << '\n';
+		break;
+	default:
+		break;
+	}
+	cout << '\n';
+}

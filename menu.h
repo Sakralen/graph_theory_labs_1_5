@@ -6,7 +6,7 @@
 //!include
 
 //define:
-#define MENU_ITEMS_MAX 11
+#define MENU_ITEMS_MAX 12
 #define MENU_ITEMS_MIN 0
 //!define
 
@@ -25,6 +25,7 @@ enum class MenuItems {
 	kPrim,
 	kSpanTreesCnt,
 	kPrufer,
+	kEulerCycle,
 	kExit
 };
 //!enum
@@ -47,6 +48,7 @@ static const char* kMenuItemsArr[] = {
 "Алгоритм Прима",
 "Подсчёт количества остовных деревьев в графе",
 "Закодировать граф кодом Прюфера",
+"Поиск эйлерова цикла",
 "Выход"
 };
 //!const
@@ -67,5 +69,6 @@ void ExecKruskal(const MyGraph& graph);
 void ExecPrim(const MyGraph& graph);
 void ExecSpanTreesCnt(const MyGraph& graph);
 void ExecPrufer(const MyGraph& graph);
+void ExecEulerCycle(const MyGraph& graph);
 //!functions
 

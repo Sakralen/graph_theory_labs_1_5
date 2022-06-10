@@ -56,6 +56,9 @@ void main() {
 			case MenuItems::kPrufer:
 				ExecPrufer(graph);
 				break;
+			case MenuItems::kEulerCycle:
+				ExecEulerCycle(graph);
+				break;
 			case MenuItems::kExit:
 				overrideFlag = true;
 				break;

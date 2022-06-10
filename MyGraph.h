@@ -46,6 +46,13 @@ enum class WeightsType {
 	kModifiedMixed
 };
 
+enum class IsEulerRes {
+	kFalse2Vert,
+	kFalseUnmodifiable,
+	kFalseModifiable,
+	kTrue
+};
+
 class MyGraph {
 private:
 	int vertexCnt;
@@ -72,6 +79,8 @@ private:
 	bool bfs_FordFulkerson(iMx residual, int source, int sink, vector<int>& path) const;
 
 	priority_queue<Edge, vector<Edge>, std::greater<Edge>> SortEdges(iMx weightsMx) const;
+	iMx MakeUnoriented(const iMx weightsMx) const;
+	vector<int> CalcDegrees(iMx weightsMx) const;
 
 public:
 	MyGraph(int n);
@@ -100,5 +109,8 @@ public:
 	int CalcSpanTreesCnt() const;
 	void PruferEncode(iMx& weightsMx, vector<int>& pruferCode, vector<int>& pruferWeights) const;
 	iMx PruferDecode(vector<int>& pruferCode, vector<int>& pruferWeights) const;
+
+	IsEulerRes IsEuler(iMx weightsMx) const;
+	vector<int> EulerCycles(iMx weightsMx, iMx& modWeightsMx, IsEulerRes& isEulerRes) const;
 };
 

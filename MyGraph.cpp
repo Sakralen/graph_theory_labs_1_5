@@ -735,11 +735,9 @@ iMx MyGraph::PruferDecode(vector<int>& pruferCode, vector<int>& pruferWeights) c
 			if (qPruferCode._Get_container().end() == std::find(qPruferCode._Get_container().begin(), qPruferCode._Get_container().end(), i)) {
 				if (isUsed[i] == false) {
 					isUsed[i] = true;
-					tmpVert = qPruferCode.front();
-					tmpWeight = qPruferWeights.front();
+					tmpVert = qPruferCode.front(); tmpWeight = qPruferWeights.front();
 					weightMx[i][tmpVert] = weightMx[tmpVert][i] = tmpWeight;
-					qPruferCode.pop();
-					qPruferWeights.pop();
+					qPruferCode.pop(); qPruferWeights.pop();
 					break;
 				}
 			}
@@ -748,3 +746,146 @@ iMx MyGraph::PruferDecode(vector<int>& pruferCode, vector<int>& pruferWeights) c
 
 	return weightMx;
 }
+
+iMx MyGraph::MakeUnoriented(const iMx weightsMx) const {
+	iMx tmpWeightMx = weightsMx;
+	for (int i = 0; i < weightsMx.size(); i++) {
+		for (int j = 0; j < i; j++) {
+			tmpWeightMx[i][j] = weightsMx[j][i];
+		}
+	}
+	return tmpWeightMx;
+}
+
+vector<int> MyGraph::CalcDegrees(iMx weightsMx) const {
+	vector<int> vertDeg(weightsMx.size(), 0);
+	for (int i = 0; i < weightsMx.size(); i++) {
+		for (int j = 0; j < weightsMx.size(); j++) {
+			if (weightsMx[i][j] != 0) {
+				vertDeg[i]++;
+			}
+		}
+	}
+	return vertDeg;
+}
+
+IsEulerRes MyGraph::IsEuler(iMx weightsMx) const {
+	if (vertexCnt == 2) {
+		return IsEulerRes::kFalse2Vert;
+	}
+
+	iMx unorWeightsMx = MakeUnoriented(weightsMx);
+	vector<int> vertDeg = CalcDegrees(unorWeightsMx);
+	IsEulerRes result;
+
+	int counter = 0;
+	bool isNotEuler = false;
+	for (int i = 0; i < vertDeg.size(); i++) {
+		if ((vertDeg[i] % 2) == 1) {
+			isNotEuler = true;
+			if (vertDeg[i] == (weightsMx.size() - 1)) {
+				return IsEulerRes::kFalseUnmodifiable;
+			}		
+		}	
+	}
+
+	if (counter == 1) {
+		return IsEulerRes::kFalseModifiable;
+	}
+
+	return IsEulerRes::kTrue;
+}
+
+vector<int> MyGraph::EulerCycles(iMx weightsMx, iMx& modWeightsMx, IsEulerRes& isEulerRes) const {
+	isEulerRes = IsEuler(weightsMx);
+	if (isEulerRes == IsEulerRes::kFalse2Vert || isEulerRes == IsEulerRes::kFalseUnmodifiable) {
+		return vector<int>();
+	}
+
+	modWeightsMx = MakeUnoriented(weightsMx);
+	vector<int> vertDeg = CalcDegrees(modWeightsMx);
+
+	if (isEulerRes == IsEulerRes::kFalseModifiable) {
+		bool isEuler = false, isChanged = false;
+		int vertToConnect = -1;
+		std::random_device rd;
+		std::mt19937 mersenne(rd());
+
+		while (!isEuler) {
+			isChanged = false;
+			for (int i = 0; i < modWeightsMx.size(); i++) {
+				if ((vertDeg[i] % 2) == 1) {							//если степень вершины i нечетная
+					vertToConnect = -1;
+					for (int j = 0; j < modWeightsMx.size(); j++) {
+						if ((modWeightsMx[i][j] == 0) && (i != j)) {	//если можно добавить ребро
+							if (vertToConnect == -1) {					//если все степени вершин j окажутся четные, добавить ребро подходящей вершине				
+								if (modWeightsMx.size() % 2 == 0) {
+									if (vertDeg[j] != modWeightsMx.size() - 1) {
+										vertToConnect = j;
+									}
+								}
+								else {
+									vertToConnect = j;
+								}
+							}
+							if ((vertDeg[j] % 2) == 1) { //если степень вершины j нечетная
+								isChanged = true;
+								vertDeg[i]++;
+								vertDeg[j]++;
+								modWeightsMx[i][j] = modWeightsMx[j][i] = mersenne() % (WEIGHT_MAX - 1) + 1; //TODO: добавить смеш. веса
+								break;
+							}
+						}
+					}
+
+					if (!isChanged && (vertToConnect != -1)) {
+						isChanged = true;
+						vertDeg[i]++;
+						vertDeg[vertToConnect]++;
+						modWeightsMx[i][vertToConnect] = modWeightsMx[vertToConnect][i] = mersenne() % (WEIGHT_MAX - 1) + 1; //TODO: добавить смеш. веса
+					}
+
+					if (vertToConnect == -1) {
+						isEulerRes = IsEulerRes::kFalseUnmodifiable;
+						return vector<int>();
+					}
+				}
+			}
+
+			if (!isChanged) {
+				isEuler = true;
+				//isEulerRes = IsEulerRes::kTrue;
+			}
+		}
+	}
+
+	//if (isEulerRes == IsEulerRes::kTrue)
+	vector<int> eulerPath;
+	int curVert;
+	std::stack<int> vertices;
+	vertices.push(0);
+	iMx weightsForDec = modWeightsMx;
+
+	while (!vertices.empty()) {
+		curVert = vertices.top();
+		if (vertDeg[curVert] == 0) {
+			vertices.pop();
+			eulerPath.push_back(curVert);
+		}
+		else {
+			for (int i = 0; i < vertexCnt; i++) {
+				if (weightsForDec[curVert][i] != 0) {
+					vertices.push(i);
+					vertDeg[i]--;
+					vertDeg[curVert]--;
+					weightsForDec[curVert][i] = 0;
+					weightsForDec[i][curVert] = 0;
+					break;
+				}
+			}
+		}
+	}
+
+	return eulerPath;
+}
+
