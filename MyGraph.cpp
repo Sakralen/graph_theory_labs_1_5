@@ -547,13 +547,14 @@ iMx MyGraph::Kruskal(iMx weightsMx, int* counter, int* sum) const {
 	priority_queue<Edge, vector<Edge>, std::greater<Edge>> pq = SortEdges(weightsMx);
 	Edge edge;
 	if (counter) {
-		(*counter) = pow(vertexCnt, 2); //итераций на сортировку
+		//(*counter) = pow(vertexCnt, 2); //итераций на сортировку
+		(*counter) = 0;
 	}
 
 	while (!pq.empty()) {
 		edge = pq.top();
 		pq.pop();
-		if (!bfs(minSpanTree, edge.vert1, edge.vert2, nullptr, counter)) {
+		if (!bfs(minSpanTree, edge.vert1, edge.vert2, nullptr, nullptr)) {
 			minSpanTree[edge.vert1][edge.vert2] = weightsMx[edge.vert1][edge.vert2];
 			minSpanTree[edge.vert2][edge.vert1] = weightsMx[edge.vert1][edge.vert2];
 		}
@@ -778,7 +779,6 @@ IsEulerOrHamilton MyGraph::IsEuler(iMx weightsMx) const {
 	vector<int> vertDeg = CalcDegrees(unorWeightsMx);
 	IsEulerOrHamilton result;
 
-	int counter = 0;
 	bool isNotEuler = false;
 	for (int i = 0; i < vertDeg.size(); i++) {
 		if ((vertDeg[i] % 2) == 1) {
@@ -789,7 +789,7 @@ IsEulerOrHamilton MyGraph::IsEuler(iMx weightsMx) const {
 		}	
 	}
 
-	if (counter == 1) {
+	if (isNotEuler) {
 		return IsEulerOrHamilton::kFalseModifiable;
 	}
 
@@ -921,50 +921,52 @@ vector<int> MyGraph::Hamilton(iMx weightsMx, iMx& modWeightsMx, IsEulerOrHamilto
 	std::random_device rd;
 	std::mt19937 mersenne(rd());
 
-	//for (int i = 0; i < weightsMx.size(); i++) {
-	//	for (int j = 0; j < weightsMx.size(); j++) {
-	//		if ((i != j) && (modWeightsMx[i][j] == 0)) {
-	//			isHamilton = false;
-	//			modWeightsMx[i][j] = modWeightsMx[j][i] = mersenne() % (WEIGHT_MAX - 1) + 1;
-	//		}
-	//	}
-	//}
-
-	vertDeg = CalcDegrees(modWeightsMx);
-	for (int i = 0; i < weightsMx.size(); i++) {
-		if (vertDeg[i] < (vertexCnt / 2)) {
-			isHamilton = false;
-			isHamRes = IsEulerOrHamilton::kFalseModifiable;
-			break;
-		}
-	}
-
-	while (!isHamilton) {
-		isChanged = false;
+	if (modWeightsMx.size() == 3) {
 		for (int i = 0; i < weightsMx.size(); i++) {
-			vertToConnect = -1;
-			if (vertDeg[i] < (vertexCnt / 2)) {
-				for (int j = 0; j < weightsMx.size(); j++) {
-					if ((modWeightsMx[i][j] == 0) && (i != j)) {
-						vertToConnect = j;
-						if (vertDeg[j] < (vertexCnt / 2)) {
-							isChanged = true;
-							vertDeg[i]++;
-							vertDeg[j]++;
-							modWeightsMx[i][j] = modWeightsMx[j][i] = mersenne() % (WEIGHT_MAX - 1) + 1;
-							break;
-						}
-					}
-				}
-				if (!isChanged && (vertToConnect != -1)) {
-					isChanged = true;
-					vertDeg[i]++;
-					modWeightsMx[i][vertToConnect] = modWeightsMx[vertToConnect][i] = mersenne() % (WEIGHT_MAX - 1) + 1;
+			for (int j = 0; j < weightsMx.size(); j++) {
+				if ((i != j) && (modWeightsMx[i][j] == 0)) {
+					modWeightsMx[i][j] = modWeightsMx[j][i] = mersenne() % (WEIGHT_MAX - 1) + 1;
 				}
 			}
 		}
-		if (!isChanged) {
-			isHamilton = true;
+	}
+	else {
+		vertDeg = CalcDegrees(modWeightsMx);
+		for (int i = 0; i < weightsMx.size(); i++) {
+			if (vertDeg[i] < (vertexCnt / 2)) {
+				isHamilton = false;
+				isHamRes = IsEulerOrHamilton::kFalseModifiable;
+				break;
+			}
+		}
+
+		while (!isHamilton) {
+			isChanged = false;
+			for (int i = 0; i < weightsMx.size(); i++) {
+				vertToConnect = -1;
+				if (vertDeg[i] < (vertexCnt / 2)) {
+					for (int j = 0; j < weightsMx.size(); j++) {
+						if ((modWeightsMx[i][j] == 0) && (i != j)) {
+							vertToConnect = j;
+							if (vertDeg[j] < (vertexCnt / 2)) {
+								isChanged = true;
+								vertDeg[i]++;
+								vertDeg[j]++;
+								modWeightsMx[i][j] = modWeightsMx[j][i] = mersenne() % (WEIGHT_MAX - 1) + 1;
+								break;
+							}
+						}
+					}
+					if (!isChanged && (vertToConnect != -1)) {
+						isChanged = true;
+						vertDeg[i]++;
+						modWeightsMx[i][vertToConnect] = modWeightsMx[vertToConnect][i] = mersenne() % (WEIGHT_MAX - 1) + 1;
+					}
+				}
+			}
+			if (!isChanged) {
+				isHamilton = true;
+			}
 		}
 	}
 
@@ -979,13 +981,14 @@ vector<int> MyGraph::Hamilton(iMx weightsMx, iMx& modWeightsMx, IsEulerOrHamilto
 	minLen = INT_MAX;
 
 	FindHamiltonCycles(ofs, modWeightsMx, path, minPath, len, minLen);
+	//findHamiltonCycle(ofs, modWeightsMx, path, len, minPath, minLen);
 
 	ofs.close();
 	return minPath;
 }
 
 void MyGraph::FindHamiltonCycles(ofstream& ofs, iMx& weightsMx, vector<int>& path, vector<int>& minPath, int& len, int& minLen) const {
-	if (path.size() == weightsMx.size()) {
+	if (path.size() == vertexCnt) {
 		if (weightsMx[path[path.size() - 1]][0] != 0) {
 			len += weightsMx[path[path.size() - 1]][0];
 			path.push_back(0);
@@ -1005,12 +1008,11 @@ void MyGraph::FindHamiltonCycles(ofstream& ofs, iMx& weightsMx, vector<int>& pat
 		return;
 	}
 
-	bool isInPath = false;
-	int tmpLen;
+	//int tmpLen;
 	for (int i = 0; i < weightsMx.size(); i++) {
-		if (weightsMx[path.size() - 1][i] != 0) {
+		if (weightsMx[path[path.size() - 1]][i] != 0) {
 			if (path.end() == find(path.begin(), path.end(), i)) {
-				tmpLen = len + weightsMx[path.size() - 1][i];
+				int tmpLen = len + weightsMx[path[path.size() - 1]][i];
 				path.push_back(i);
 				FindHamiltonCycles(ofs, weightsMx, path, minPath, tmpLen, minLen);
 				path.pop_back();
@@ -1018,3 +1020,61 @@ void MyGraph::FindHamiltonCycles(ofstream& ofs, iMx& weightsMx, vector<int>& pat
 		}
 	}
 }
+
+//void MyGraph::findHamiltonCycle(ofstream& fout, vector<vector<int>>& graph,
+//	vector<int>& path, int length, vector<int>& minimumPath, int& minimumLength) const {
+//	if (path.size() == vertexCnt)
+//	{
+//		if (graph[path[path.size() - 1]][0] != 0)
+//		{
+//			length += graph[path[path.size() - 1]][0];
+//			path.push_back(0);
+//
+//			if (minimumLength > length)
+//			{
+//				minimumPath = path;
+//				minimumLength = length;
+//			}
+//
+//			fout << "Цикл: ";
+//			int i = 0;
+//			for (i; i < path.size() - 1; i++) {
+//				fout << path[i] + 1 << "->";
+//			}
+//			fout << path[i] + 1 << '\n';
+//			fout << "Вес:" << length << '\n';
+//
+//			path.pop_back();
+//		}
+//		return;
+//	}
+//	else
+//	{
+//		for (int i = 0; i < vertexCnt; i++)
+//		{
+//			if (graph[path[path.size() - 1]][i] != 0)
+//			{
+//				bool isInPath = false;
+//
+//				for (int j = 0; j < path.size(); j++)
+//				{
+//					if (path[j] == i)
+//					{
+//						isInPath = true;
+//						break;
+//					}
+//				}
+//
+//				if (!isInPath)
+//				{
+//					int newLength = length + graph[path[path.size() - 1]][i];
+//					path.push_back(i);
+//					findHamiltonCycle(fout, graph, path, newLength, minimumPath, minimumLength);
+//					path.pop_back();
+//				}
+//			}
+//		}
+//
+//		return;
+//	}
+//}

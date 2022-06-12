@@ -114,5 +114,7 @@ public:
 	vector<int> EulerCycles(iMx weightsMx, iMx& modWeightsMx, IsEulerOrHamilton& isEulerRes) const;
 	vector<int> Hamilton(iMx weightsMx, iMx& modWeightsMx, IsEulerOrHamilton& isHamRes, int& minLen) const;
 	void FindHamiltonCycles(ofstream& ofs, iMx& weightsMx, vector<int>& path, vector<int>& minPath, int& len, int& minLen) const;
+	//void findHamiltonCycle(ofstream& fout, vector<vector<int>>& graph,
+	//	vector<int>& path, int length, vector<int>& minimumPath, int& minimumLength) const;
 };
 
